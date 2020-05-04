@@ -1,0 +1,8 @@
+# starting a new repo with a readme file started on github
+
+git clone https://github.com/csiro-dcfp/postprocess_ci
+git pull https://github.com/csiro-dcfp/postprocess_ci
+git add *.sh
+git add *.jnl
+git commit -m "Initial files to post process forecasts to generate climate indices"
+git push
