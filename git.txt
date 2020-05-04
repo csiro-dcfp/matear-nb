@@ -6,3 +6,7 @@ git add *.sh
 git add *.jnl
 git commit -m "Initial files to post process forecasts to generate climate indices"
 git push
+
+
+# now to get it back do
+git clone https://github.com/csiro-dcfp/matear-nb.git

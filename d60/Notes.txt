@@ -1,0 +1,7 @@
+Analysis for cafe60 1st paper.
+
+Here I look at the bgc fields for this paper.
+Initial analysis done on pearcey but to speed up graphics
+I separated the effort into extraction and plotting.
+
+
