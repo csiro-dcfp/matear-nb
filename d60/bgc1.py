@@ -94,10 +94,10 @@ gdic= dbgc.stf07*dgrid.area_t*86400*365*12E-3
 gadic= dbgc.stf10*dgrid.area_t*86400*365*12E-3
 sdic=dbgc.stf07.sel(yt_ocean=slice(-90,-35))*dgrid.area_t*86400*365*12E-3
 sadic=dbgc.stf10.sel(yt_ocean=slice(-90,-35))*dgrid.area_t*86400*365*12E-3
-sstd_d=sdic.sum(axis=(2,3)).load()
-sstd_a=sadic.sum(axis=(2,3)).load()
-gstd_d=gdic.sum(axis=(2,3)).load()
-gstd_a=gadic.sum(axis=(2,3)).load()
+sstd_d=sdic.sum(axis=(2,3))
+sstd_a=sadic.sum(axis=(2,3))
+gstd_d=gdic.sum(axis=(2,3))
+gstd_a=gadic.sum(axis=(2,3))
 
 
 # + Collapsed="false"
@@ -124,19 +124,24 @@ file4='/OSM/CBR/OA_DCFP/work/mat236/obs/spco2_clim_1985-2015_MPI_SOM-FFN_v2016.n
 dfco2=xr.open_dataset(file4)
 oflx=dfco2.fgco2_clim.mean(axis=0).load()*12  # mol/m2/y to gC/m2/y
 
-oflx.to_netcdf('oflx.nc')
+
+# + Collapsed="false"
+# save some output
+ddout='/scratch1/mat236/work/'
+oflx.to_netcdf(ddout+'oflx.nc')
 
 # + Collapsed="false"
 # averaged flux 
-aflx=dbgc.stf10.sel(time=slice('1985-01-16','2015-12-31')).mean(axis=(0,1)).load()*86400*365*12e-3 # mmol/m2/s to g C/m2/y
+aflx=dbgc.stf10.sel(time=slice('1985-01-16','2015-12-31')).mean(
+    axis=(0,1)).load()*86400*365*12e-3 # mmol/m2/s to g C/m2/y
 
-aflx.to_netcdf('aflx.nc')
+aflx.to_netcdf(ddout+'aflx.nc')
 
 # + [markdown] Collapsed="false"
 # ## Sections
 
 # + Collapsed="false"
-dir='/home/mat236/dcfp/d60/bowen/data2/observations/GLODAPv2/mapped/GLODAPv2.2016b_MappedClimatologies/'
+dir='bowen/data2/observations/GLODAPv2/mapped/GLODAPv2.2016b_MappedClimatologies/'
 file1='GLODAPv2.2016b.PO4.nc' 
 file2='GLODAPv2.2016b.TCO2.nc'
 file3='GLODAPv2.2016b.Cant.nc'
@@ -144,11 +149,13 @@ dfco2=xr.open_dataset(dir+file2)
 dpo4=xr.open_dataset(dir+file1)
 daco2=xr.open_dataset(dir+file3)
 
-Depth=dfoc2.DEPTH
-otco2=dfco2.TCO2.sel(lon=180.5).load()*1.025
-opo4 =dpo4.PO4.sel(lon=180.5).load()*1.025
-oaco2 =daco2.Cant.sel(lon=180.5).load()*1.025
+Depth=dfco2.Depth
+otco2=dfco2.TCO2.sel(lon=180.5)*1.025
+opo4 =dpo4.PO4.sel(lon=180.5)*1.025
+oaco2 =daco2.Cant.sel(lon=180.5)*1.025
 
+
+# + Collapsed="false"
 Depth.to_netcdf(ddout+'odepth.nc')
 otco2.to_netcdf(ddout+'otco2.nc')
 opo4.to_netcdf(ddout+'opo4.nc')
@@ -156,16 +163,19 @@ oaco2.to_netcdf(ddout+'oaco2.nc')
 
 # + Collapsed="false"
 tmp=dbgc.adic.mean(axis=1)  # mean of the ensemble
-adic=tmp.sel(time=slice('2002-01-16','2002-12-31'),xt_ocean=-179.5).mean(axis=0).load()
+adic=tmp.sel(time=slice('2002-01-16','2002-12-31'),
+             xt_ocean=-179.5).mean(axis=0)
 adic.to_netcdf(ddout+'adic.nc')
 
 tmp=dbgc.dic.mean(axis=1)  # mean of the ensemble
-dic=tmp.sel(time=slice('2002-01-16','2002-12-31'),xt_ocean=-179.5).mean(axis=0).load()
+dic=tmp.sel(time=slice('2002-01-16','2002-12-31'),
+            xt_ocean=-179.5).mean(axis=0)
 dic.to_netcdf(ddout+'dic.nc')
 
 tmp=dbgc.no3.mean(axis=1)  # mean of the ensemble
-po4=1/16.*tmp.sel(time=slice('2002-01-16','2002-12-31'),xt_ocean=-179.5).mean(axis=0).load()
+po4=1/16.*tmp.sel(time=slice('2002-01-16','2002-12-31'),
+                  xt_ocean=-179.5).mean(axis=0)
 po4.to_netcdf(ddout+'po4.nc')
 
-# + Collapsed="false"
-
+# + [markdown] Collapsed="false"
+# # Finished !!
