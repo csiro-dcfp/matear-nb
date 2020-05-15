@@ -46,9 +46,10 @@ def climatology(dsx,TIME1):
 # + Collapsed="false"
 #file='../big/data/csiro-dcfp-cafe-d60/ocean_month.zarr'
 #file1='../big/data/csiro-dcfp-cafe-d60/ocean_ens_mean_at_analysis.zarr'
-file3='../big/data/csiro-dcfp-cafe-d60/atmos_isobaric_month.zarr'
+#file3='../big/data/csiro-dcfp-cafe-d60/atmos_isobaric_month.zarr'
 file2='/OSM/CBR/OA_DCFP/data3/scratch_backup/06-Apr-2020/csiro-dcfp-cafe-d60/ocean_bgc_month.zarr'
-file1='../big/data/csiro-dcfp-cafe-d60/ocean_grid.nc'
+file2='/OSM/CBR/OA_DCFP/data/model_output/CAFE/data_assimilation/d60-zarr/ocean_bgc_month.zarr'
+#file1='../big/data/csiro-dcfp-cafe-d60/ocean_grid.nc'
 file1='/home/mat236/area.nc'
 
 dgrid=xr.open_dataset(file1)
@@ -115,7 +116,7 @@ totsa.to_netcdf(ddout+'totsa.nc')
 sstd_d.to_netcdf(ddout+'sstd_d.nc')
 sstd_a.to_netcdf(ddout+'sstd_a.nc')
 
-# + [markdown] Collapsed="false"
+# + [markdown] Collapsed="true"
 # ## Flux Map
 
 # + Collapsed="false"
@@ -155,6 +156,56 @@ opo4 =dpo4.PO4.sel(lon=180.5)*1.025
 oaco2 =daco2.Cant.sel(lon=180.5)*1.025
 
 
+# + [markdown] Collapsed="false"
+# ### inventory map calculation
+
+# + Collapsed="false"
+# observations
+dx=Depth.copy()
+dx[0:31]=Depth[1:32] - Depth[0:31]; dx[32]=500
+ogd=daco2.Cant.assign_coords(depth_surface=daco2.Depth.values)
+ogd=ogd.rename({'depth_surface':'depth'})
+ocinv=(daco2.Cant*dx).sum(axis=0)*1.025 *1e-3  # mol/m^2
+#daco2.Cant.sel(lon=180.5,lat=.5).plot()
+
+# + Collapsed="false"
+# model
+tmp=dbgc.adic.mean(axis=1)
+adic=tmp.sel(time=slice('2002-01-16','2002-12-31')).mean(axis=0)
+tmp=dbgc.dic.mean(axis=1)
+dic=tmp.sel(time=slice('2002-01-16','2002-12-31')).mean(axis=0)
+cant=(adic-dic).load()
+
+
+# + Collapsed="false"
+mdepth=np.copy(dbgc.st_ocean)
+dd=dbgc.st_ocean.copy()
+dtop=mdepth*0
+#dtop[49]=6000
+dtop[1:50]=(mdepth[1:50]-mdepth[0:49])*.5 + mdepth[0:49]
+dtop
+dmx=dtop*0
+dmx[0:49]=dtop[1:50]-dtop[0:49]; dmx[49]=334.7
+dd=dd*0+dmx
+inv=1e-3*cant*dd
+mcinv=inv.sum(axis=0)
+
+# + Collapsed="false"
+ddout='/scratch1/mat236/work/'
+ocinv.to_netcdf(ddout+'oinv.nc')
+cant.to_netcdf(ddout+'cant.nc')
+mcinv.to_netcdf(ddout+'mcinv.nc')
+
+# + [markdown] Collapsed="false"
+# ### Pacific Section
+#
+
+# + Collapsed="false"
+Depth=dfco2.Depth
+otco2=dfco2.TCO2.sel(lon=180.5)*1.025
+opo4 =dpo4.PO4.sel(lon=180.5)*1.025
+oaco2 =daco2.Cant.sel(lon=180.5)*1.025
+
 # + Collapsed="false"
 Depth.to_netcdf(ddout+'odepth.nc')
 otco2.to_netcdf(ddout+'otco2.nc')
@@ -179,4 +230,4 @@ po4.to_netcdf(ddout+'po4.nc')
 
 # + [markdown] Collapsed="false"
 # # Finished !!
-### rjm 
+# ## rjm 

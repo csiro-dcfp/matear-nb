@@ -1,0 +1,6 @@
+#
+
+# on pearcey the steps are
+conda activate pangeo
+jupyter notebook --generate-config  # only done once
+jupyter lab --no-browser --ip=`hostname` --port=8890
