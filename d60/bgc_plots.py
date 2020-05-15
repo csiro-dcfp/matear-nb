@@ -46,7 +46,7 @@ def climatology(dsx,TIME1):
 ddout='scratch/'
 #dgrid=xr.open_dataset(file1)
 
-# + [markdown] Collapsed="true"
+# + [markdown] Collapsed="false"
 # ## integrated fluxes
 
 # + Collapsed="false"
@@ -54,6 +54,15 @@ def readn(ff):
     f1=xr.open_dataset(ddout+ff+'.nc')
     ff=f1.__xarray_dataarray_variable__.rename(ff).load()
     return(ff)
+
+def reads1(ff,f2):
+    f1=xr.open_dataset(ddout+ff+'.nc')
+    ff=f1[f2]
+    return(ff)
+
+def region(ds,lat1,lat2):
+    dsr=ds.sel(lat=slice(lat1,lat2))
+    return (dsr)
 
 
 # + Collapsed="false"
@@ -69,16 +78,21 @@ totsa=readn('totsa')
 sstd_d=readn('sstd_d')
 sstd_a=readn('sstd_a')
 
+# + Collapsed="false"
+oflx=reads1('oc_v1.7_daily','co2flux_ocean')
+sflx=oflx.sel(lat=slice(-90,-35))
+time2=np.arange(1982,2019.026,.00274)
 
-# + Collapsed="false" jupyter={"outputs_hidden": true}
+
+# + Collapsed="false"
 # Plot figure
 def flxplt(a,b,da,db):
     a1=(a+da).rolling(time=12, center=True).mean()
     a2=(a-da).rolling(time=12, center=True).mean()
     b1=(b+db).rolling(time=12, center=True).mean()
     b2=(b-db).rolling(time=12, center=True).mean()
-    plt.plot(time1,a.rolling(time=12, center=True).mean(),label='Natural')
-    plt.plot(time1,b.rolling(time=12, center=True).mean(),label='Anthropogenic')
+    plt.plot(time1,a.rolling(time=12, center=True).mean(),label=tl1,color='blue')
+    plt.plot(time1,b.rolling(time=12, center=True).mean(),label=tl2,color='orange')
     plt.plot(time1,a*0,color='black')
     plt.fill_between(time1,a1,a2,color='cyan',alpha=.75)
     plt.fill_between(time1,b1,b2,color='orange',alpha=0.75)
@@ -92,6 +106,8 @@ def flxplt(a,b,da,db):
 plt.figure(figsize=(10, 10))
 plt.subplot(2,2,1)
 # global
+tl1='Natural'
+tl2="Total"
 t1='Global'
 flxplt(totd*(-1e-15),tota*(-1e-15),gstd_d.std(axis=1)*1e-15,gstd_a.std(axis=1)*1e-15)
 plt.subplot(2,2,2)
@@ -99,41 +115,80 @@ t1='Southern Ocean'
 flxplt(totsd*(-1e-15),totsa*(-1e-15),sstd_d.std(axis=1)*1e-15,sstd_a.std(axis=1)*1e-15)
 
 plt.subplot(2,2,3)
-plt.xlim(1985,2020)
+plt.xlim(1982,2020)
+plt.ylim(-4,0)
 # global
 t1='Global'
-flxplt(totd*(-1e-15),tota*(-1e-15),gstd_d.std(axis=1)*1e-15,gstd_a.std(axis=1)*1e-15)
+tl1='Observation'
+tl2="Total"
+flxplt(totd*(-1e-15)*0,tota*(-1e-15)+.5,gstd_d.std(axis=1)*1e-15*0,gstd_a.std(axis=1)*1e-15)
+plt.plot(time2,oflx.sum(axis=(1,2)).rolling(mtime=365, center=True).mean(),color='blue')
+
 plt.subplot(2,2,4)
-plt.xlim(1985,2020)
+plt.xlim(1982,2020)
+plt.ylim(-2.5,0)
 t1='Southern Ocean'
-flxplt(totsd*(-1e-15),totsa*(-1e-15),sstd_d.std(axis=1)*1e-15,sstd_a.std(axis=1)*1e-15)
+flxplt(totsd*(-1e-15)*0,totsa*(-1e-15),sstd_d.std(axis=1)*1e-15*0,sstd_a.std(axis=1)*1e-15)
+
+plt.plot(time2,sflx.sum(axis=(1,2)).rolling(mtime=365, center=True).mean(),color='blue')
 
 plt.savefig('fco2.pdf',dpi=600)
 
+
 # + [markdown] Collapsed="false"
 # ## flux maps
-# -
+# + Collapsed="false"
+def reads1(ff,f2):
+    f1=xr.open_dataset(ddout+ff+'.nc')
+    ff=f1[f2]
+    return(ff)
 
 
+# + Collapsed="false"
+oflx=reads1('oflx','fgco2_clim')
+aflx=reads1('aflx','stf10')
 
-# +
-def mflxplt(a,y,x):
-    plt.xlabel('Longitude East')
-    plt.ylabel('Latitude')
-    plt.title(t1)
-    cv=np.arange(-50,60,5)
-    ff=plt.contourf(x,y,a,cmap='RdBu_r',levels=cv ,extend='both')
-    cbar = plt.colorbar(ff)
-    cbar.set_label('Sea to Air flux (g C m$^{-2}$ y$^{-1}$)')
+
+# + Collapsed="false"
+# Generic Plot Map script using subplot
+def map1(a,y,x):
+    import cartopy
+    from mpl_toolkits.axes_grid1 import AxesGrid
+    from cartopy.mpl.geoaxes import GeoAxes
+#    proj=ccrs.Mollweide()
+#    proj=ccrs.Robinson(central_longitude=180)
+    dproj=ccrs.PlateCarree()
+    ax.coastlines(resolution='110m')
+    ax.gridlines()
+    ax.add_feature(cartopy.feature.LAND, zorder=0, edgecolor='black',
+                   color='grey') #'white')
+    p=ax.contourf(x, y, a,levels=cv, cmap=cmap,transform=dproj,extend='both')
     
-plt.figure(figsize=(12,5 ))
-plt.subplot(1,2,1)
-t1='Observations'
-mflxplt(oflx,oflx.lat,oflx.lon)
+#    
+    plt.colorbar(p, shrink=.8, orientation='horizontal',
+                 label=cbtit)
+    plt.title(t1)
 
-plt.subplot(1,2,2)
+    return
+    
+
+
+# + Collapsed="false"
+plt.figure(figsize=(12,5 ))
+cmap='RdBu_r'
+cbtit='Sea to Air flux (g C m$^{-2}$ y$^{-1}$)'
+cv=np.arange(-50,55,5)
+proj=ccrs.Robinson(central_longitude=180)
+
+ax = plt.subplot(1,2,1,projection=proj)
+t1='Observations'
+map1(oflx,oflx.lat,oflx.lon)
+
+ax = plt.subplot(1,2,2,projection=proj)
 t1='CAFE60'
-mflxplt(aflx*(-1),aflx.yt_ocean,aflx.xt_ocean)
+map1(aflx*(-1),aflx.yt_ocean,aflx.xt_ocean)
+
+plt.savefig('flx_map.pdf',dpi=600)
 
 
 # + [markdown] Collapsed="false"
@@ -147,7 +202,7 @@ def reads1(ff,f2):
 
 
 # + Collapsed="false"
-Depth=np.arange(0,3300,100)
+Depth=reads1('odepth','Depth')
 otco2=reads1('otco2','TCO2')
 opo4=reads1('opo4','PO4')
 oaco2=reads1('oaco2','Cant')
@@ -218,6 +273,39 @@ t1='CAFE60'
 splt(aco2,aco2.st_ocean,aco2.yt_ocean)  
 
 plt.savefig('aco2_section.pdf',dpi=600)
+
+
+# + [markdown] Collapsed="false"
+# ## integrate aco2 maps
+
+# + Collapsed="false"
+def reads1(ff,f2):
+    f1=xr.open_dataset(ddout+ff+'.nc')
+    ff=f1[f2]
+    return(ff)
+
+
+# + Collapsed="false"
+mcant=reads1('mcinv','a')
+ocant=reads1('oinv','a')
+
+# + Collapsed="false"
+plt.figure(figsize=(12,5 ))
+cmap='Reds'
+#cmap='PuRd'
+cbtit='Anthropogenic CO$_2$ (mol m$^{-2}$)'
+cv=np.arange(0,250,20)
+proj=ccrs.Robinson(central_longitude=180)
+
+ax = plt.subplot(1,2,1,projection=proj)
+t1='Observations'
+map1(ocant,ocant.lat,ocant.lon)
+
+ax = plt.subplot(1,2,2,projection=proj)
+t1='CAFE60'
+map1(mcant,mcant.yt_ocean,mcant.xt_ocean)
+
+plt.savefig('cant_map.pdf',dpi=600)
 
 # + Collapsed="false"
 
