@@ -11,7 +11,7 @@ module list
 
 dir /home/mat236/miniconda/bin
 
-cd /home/mat236/dcfp/d60
+cd /home/mat236/dcfp/matear-nb/d60
 conda activate pangeo
 
-python bgc1.py 
+python bgc2.py 
