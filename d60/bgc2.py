@@ -57,6 +57,18 @@ file1='/home/mat236/area.nc'
 dgrid=xr.open_dataset(file1)
 dbgc = xr.open_zarr(file2,consolidated=True)
 
+# + Collapsed="false"
+file3='../../big/data/csiro-dcfp-cafe-d60/ocean_month.zarr'
+#file3='../../big/data/csiro-dcfp-cafe-d60/ocean_ens_mean_at_analysis.zarr'
+file3='/OSM/CBR/OA_DCFP/data/model_output/CAFE/data_assimilation/d60-zarr/ocean_bgc_daily.zarr'
+file4='/OSM/CBR/OA_DCFP/data/model_output/CAFE/data_assimilation/d60-zarr/ocean_daily.zarr'
+day_bgc = xr.open_zarr(file3,consolidated=True)
+day_ocn = xr.open_zarr(file4,consolidated=True)
+
+
+# + Collapsed="false"
+
+
 
 # + Collapsed="false"
 #file3='../big/data/csiro-dcfp-cafe-d60/atmos_isobaric_month.zarr'
@@ -76,7 +88,7 @@ def region(ds,lat1,lat2):
 #The big box I've been looking at for regional context is:
 # Lat: -35:-60 | Lon: 90E: 180E.  
 dd=dbgc.sel(yt_ocean=slice(-60,-35),st_ocean=slice(0,500),xt_ocean=slice(90-360,180-360),
-            time=slice('2000','2019'))
+            time=slice('2000','2018'))
 
 pclim,pseason,panom=climatology(dd,'time')
 
@@ -85,6 +97,55 @@ pclim.phy.to_netcdf('/scratch1/mat236/tr/phy.nc')
 pclim.zoo.to_netcdf('/scratch1/mat236/tr/zoo.nc')
 pclim.no3.to_netcdf('/scratch1/mat236/tr/no3.nc')
 pclim.pprod_gross.to_netcdf('/scratch1/mat236/tr/pprod_gross.nc')
+
+# + Collapsed="false"
+ds=day_bgc.sel(yt_ocean=slice(-60,-35),xt_ocean=slice(90-360,180-360),
+            time=slice('2000','2018'))
+pclim = ds.groupby('time'+'.dayofyear').mean(dim='time')
+pclim.surface_phy.to_netcdf('/scratch1/mat236/tr/dphy.nc')
+pclim.pprod_gross_2d.to_netcdf('/scratch1/mat236/tr/dpprod_gross_2d.nc')
+
+
+# + Collapsed="false"
+ds=day_bgc.sel(yt_ocean=slice(-60,-35),xt_ocean=slice(90-360,180-360),
+            time=slice('2000','2018'))
+pclim,pseason,panom=climatology(ds,'time')
+pclim.surface_phy.to_netcdf('/scratch1/mat236/tr/dphy.nc')
+pclim.pprod_gross_2d.to_netcdf('/scratch1/mat236/tr/dpprod_gross_2d.nc')
+
+
+
+# + Collapsed="false"
+ds=day_ocn.sel(yt_ocean=slice(-60,-35),xt_ocean=slice(90-360,180-360),
+            time=slice('2000','2018'))
+pclim,pseason,panom=climatology(ds,'time')
+pclim = ds.groupby('time'+'.dayofyear').mean(dim='time')
+pclim.mld.to_netcdf('/scratch1/mat236/tr/dmld.nc')
+pclim.sst.to_netcdf('/scratch1/mat236/tr/dsst.nc')
+
+
+
+# + [markdown] Collapsed="false"
+# # some Southern Ocean Phytoplankton plots
+
+# + Collapsed="false"
+
+cv=np.arange(0,.6,.05)
+fig=plt.figure(figsize=(10,10))
+plt.subplot(2,2,1)
+dbgc.phy[719,15,0,0:90,:].plot(levels=cv)
+plt.subplot(2,2,2)
+dbgc.phy[719-12,15,0,0:90,:].plot(levels=cv)
+plt.subplot(2,2,3)
+dbgc.phy[719-24,15,0,0:90,:].plot(levels=cv)
+plt.subplot(2,2,4)
+dbgc.phy[719-30,15,0,0:90,:].plot(levels=cv)
+
+# + Collapsed="false"
+dbgc.phy[719-27,95,0,0:90,:].plot(levels=cv)
+
+# + Collapsed="false"
+dbgc.phy[650:712,15,0,71,300].plot()
 
 # + Collapsed="false"
 
