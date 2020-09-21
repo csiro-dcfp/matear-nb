@@ -7,4 +7,8 @@ The repository has folders setup according projects I'm working on.
 
 d60 - cafe60 reanalysis first paper with bgc analysis
 cafe - control run analysis
+cafe1 - 
+f5 - first analysis of f5 forecasts done for WMO report
+f6 - analysis of the f6 forecasts
+
 
