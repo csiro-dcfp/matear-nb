@@ -171,7 +171,7 @@ nino3.load()  # f6 corrected with obs
 acorr.load()  # f6 corrected with f5
 onino3.load() # obs
 
-acorr.to_netcdf(ci+'.nc')
+acorr.to_netcdf(ci+'_'+syear+'.nc')
 
 # +
 # find observation time that matches forecasts
@@ -241,7 +241,7 @@ bmin=acorr[:,0:10].min('ensemble')
 
 
 line3plt(gm,gmax,gmin,b,bmax,bmin)
-plt.plot(onino3[index:],color='black',linewidth=4)
+plt.plot(onino3[index:],color='black',linewidth=4,label='Obs')
 
 plt.savefig(ci+'_'+syear+'.pdf',dpi=600)
 # +
@@ -249,15 +249,16 @@ plt.savefig(ci+'_'+syear+'.pdf',dpi=600)
 a=acorr[3:120:12,:]
 
 plt.figure(figsize=(10, 10))
-plt.hist(np.ravel(a),bins=30)
-plt.hist(np.ravel(a[:,0:10]),color='orange')
+plt.hist(np.ravel(a),bins=30,label='f6')
+plt.hist(np.ravel(a[:,0:10]),color='orange',label='f5')
 
-plt.hist(onino3[0:464:12],color='green') 
-plt.title(ci+': Jan')
+plt.hist(onino3[0:464:12],color='green',label='Obs') 
+plt.title(ci+'-'+syear+': Jan')
 plt.xlabel('Index ')
 plt.ylabel('Number')
 
 plt.text(-3,80,'Samples='+str(a.size))
+plt.legend()
 plt.savefig(ci+'_'+syear+'_hist.pdf',dpi=600)
 # -
 
