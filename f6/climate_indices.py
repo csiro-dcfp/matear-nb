@@ -94,7 +94,7 @@ oclim,oseason,oanom=climatology(d2,'time')
 
 # ## F5
 
-f5='/g/data/v14/vxk563/CAFE/forecasts/f5/WIP/ZARR/'
+f5='/g/data/v14/vxk563/CAFE/forecasts/f5/ZARR/'
 df5=xr.open_zarr(f5+file1)
 
 

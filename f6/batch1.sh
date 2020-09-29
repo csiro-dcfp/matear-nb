@@ -17,7 +17,7 @@ conda activate pangeo
 
 ci=( nino3 nino4 nino34)
 yr=( 2015 2016 2017 2018 )
-yr=( 2013 2014 )
+yr=( 2014 2013 2012 2011 2010 2009  2008  )
 for var in ${ci[*]}
 do
 for year in ${yr[*]}
