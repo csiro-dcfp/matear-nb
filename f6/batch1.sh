@@ -18,9 +18,10 @@ conda activate pangeo
 ci=( nino3 nino4 nino34)
 yr=( 2015 2016 2017 2018 )
 yr=( 2014 2013 2012 2011 2010 2009  2008  )
-for var in ${ci[*]}
-do
+yr=( 2020 )
 for year in ${yr[*]}
+do
+for var in ${ci[*]}
 do
 echo ${year} ${var}
 time python climate_indices.py ${year} ${var} 
